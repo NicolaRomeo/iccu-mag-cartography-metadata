@@ -1,30 +1,36 @@
-# coding=utf-8
-# This is a sample Python script.
-
-# Press Maiusc+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
 import csv
 import json
-import tkinter as tk
+from tkinter import *
+from tkinter import ttk
+from tkinter.filedialog import askopenfilename
 
-# Function to convert a CSV to JSON
-# Takes the file paths as arguments
 def run_app():
-    window = tk.Tk()
-    greeting = tk.Label(text="MAG Cartography Metadata", # Set the text color to white
-    background="#34A2FE")  # Set the background color to black)
-    greeting.pack()
-    button = tk.Button(
-        text="Upload",
-        width=25,
-        height=5,
-        bg="grey",
-        fg="black",
-    )
-    button.pack()
-    window.mainloop()
+    def calculate(*args):
+        Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
+        filename = askopenfilename()  # show an "Open" dialog box and return the path to the selected file
+        print(filename)
+
+    #main application window
+    root = Tk()
+    root.title("ICCU Digitalisation Cartography - images to xml")
+    #frame widget
+    mainframe = ttk.Frame(root, padding="3 3 12 12")
+    mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
+    #entry widget (feet textbox)
+    #other widgets
+
+    ttk.Button(mainframe, text="Upload", command=calculate).grid(column=3, row=3, sticky=W)
+
+    #adding some polish
+    for child in mainframe.winfo_children():
+        child.grid_configure(padx=5, pady=5)
+    root.bind("<Return>", calculate)
+
+    #start event loop
+    root.mainloop()
+
 
 # Driver Code
 
