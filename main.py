@@ -3,12 +3,28 @@ import json
 from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
+from tkinter import messagebox
+from lxml import etree
+def generate_xml():
+    DC_NAMESPACE = "http://purl.org/dc/elements/1.1/"
+    DC = "{%s}" % DC_NAMESPACE
+
+    NSMAP = {'dc': DC_NAMESPACE}  # the default namespace (no prefix)
+
+    root = etree.Element("metadigit", nsmap=NSMAP)  # lxml only!
+
+    print(etree.tostring(root, pretty_print=True))
 
 def run_app():
     def calculate(*args):
         Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
         filename = askopenfilename()  # show an "Open" dialog box and return the path to the selected file
         print(filename)
+        if filename.split('.')[-1] != 'zip':
+            messagebox.showerror("Errore di caricamento", "Il file non è uno zip. Le immagini devono essere compresse in uno zip. Riprova.")
+            #raise Exception("Il file non è uno zip. Le immagini devono compresse in uno zip. Riprova.")
+        generate_xml()
+
 
     #main application window
     root = Tk()
