@@ -7,11 +7,16 @@ from tkinter import messagebox
 from lxml import etree
 def generate_xml():
     DC_NAMESPACE = "http://purl.org/dc/elements/1.1/"
-    DC = "{%s}" % DC_NAMESPACE
+    NISO_NAMESPACE = "http://www.niso.org/pdfs/DataDict.pdf"
+    XLINK_NS = "http://www.w3.org/TR/xlink"
+    XSI_NS = "http://www.w3.org/2001/XMLSchema-instance"
+    DEF_NS =  "http://www.iccu.sbn.it/metaAG1.pdf"
 
-    NSMAP = {'dc': DC_NAMESPACE}  # the default namespace (no prefix)
+    attr_qname = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation")
 
-    root = etree.Element("metadigit", nsmap=NSMAP)  # lxml only!
+    NSMAP = {'dc': DC_NAMESPACE, "niso": NISO_NAMESPACE, "xlink": XLINK_NS, "xsi": XSI_NS, None: DEF_NS}  # the default namespace (no prefix)
+
+    root = etree.Element("metadigit", {attr_qname:"http://www.iccu.sbn.it/metaAG1.pdf metadigit.xsd", "version": "2.0.1"}, nsmap=NSMAP)  # lxml only!
 
     print(etree.tostring(root, pretty_print=True))
 
