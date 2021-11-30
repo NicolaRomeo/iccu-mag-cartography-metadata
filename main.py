@@ -26,75 +26,88 @@ def run_app():
     root.title("ICCU Digitalisation Cartography - images to xml")
     #frame widget
     mainframe = ttk.Frame(root, padding="3 3 12 12")
-    mainframe.grid(column=5, row=5, sticky=(N, W, E, S))
+    mainframe.pack(fill=BOTH,expand=1)
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
     #start event loop
+    my_canvas= Canvas(mainframe)
+    my_canvas.pack(side=LEFT,fill=BOTH,expand=1)
+    my_scrollbar = ttk.Scrollbar(mainframe, orient=VERTICAL,command=my_canvas.yview)
+    my_scrollbar.pack(side=RIGHT,fill=Y)
+    my_canvas.configure(yscrollcommand=my_scrollbar.set)
+    my_canvas.bind('<Configure>',lambda e: my_canvas.configure(scrollregion=my_canvas.bbox("all")))
+    #create another frame inside the canvas
+    second_frame = Frame(my_canvas)
+    my_canvas.create_window((0,0),window=second_frame, anchor='nw')
 
     '''                     SEZIONE GEN         '''
     #input utente per Stprog: indicazione del progetto di digitalizzazione. Esempio: www.mioprogetto.it
     # oppure l'home page dell'istituzione responsabile oppure l'uri del progetto
-    L1 = Label(root, text="Stprog (premi invio nella casella di testo per inserire i dati)").grid(column=1, row=1, sticky=W)
-    E1 = Entry(root, bd=5)
+    L1 = Label(second_frame, text="Stprog (premi invio nella casella di testo per inserire i dati)").grid(column=1, row=1, sticky=W)
+    E1 = Entry(second_frame, bd=5)
     E1.grid(column=1, row=2, sticky=W)
 
     #input utente per agency = istituzione responsabile del processo.
-    L2 = Label(root, text="Agency (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=3, sticky=W)
-    E2 = Entry(root, bd=5)
+    L2 = Label(second_frame, text="Agency (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=3, sticky=W)
+    E2 = Entry(second_frame, bd=5)
     E2.grid(column=1, row=4, sticky=W)
 
     #input utente per diritti di accesso: (uso riservato all'interno dell'istituzione= 0, uso pubblico=1)
-    L3 = Label(root, text="Diritti di accesso").grid(column=1, row=5, sticky=SW)
+    L3 = Label(second_frame, text="Diritti di accesso").grid(column=1, row=5, sticky=SW)
     var = IntVar()
-    R1 = Radiobutton(root, text="0: Uso riservato all'interno dell'istituzione", variable=var, value=0)
-    R2 = Radiobutton(root, text="1: Uso pubblico", variable=var, value=1)
+    R1 = Radiobutton(second_frame, text="0: Uso riservato all'interno dell'istituzione", variable=var, value=0)
+    R2 = Radiobutton(second_frame, text="1: Uso pubblico", variable=var, value=1)
     R1.grid(column=1, row=6, sticky=W)
     R2.grid(column=2, row=6, sticky=W)
     #input utente per Completezza della digitalizzazione: (0=completa, 1=incompleta)
-    L4 = Label(root, text="Completezza della digitalizzazione").grid(column=1, row=7, sticky=W)
+    L4 = Label(second_frame, text="Completezza della digitalizzazione").grid(column=1, row=7, sticky=W)
     option = IntVar()
-    R1 = Radiobutton(root, text="0: digitalizzazione completa", variable=option, value=0)
-    R2 = Radiobutton(root, text="1: digitalizzazione incompleta", variable=option, value=1)
+    R1 = Radiobutton(second_frame, text="0: digitalizzazione completa", variable=option, value=0)
+    R2 = Radiobutton(second_frame, text="1: digitalizzazione incompleta", variable=option, value=1)
     R1.grid(column=1, row=8, sticky=W)
     R2.grid(column=2, row=8, sticky=W)
+
     '''                     SEZIONE BIB         '''
     #livello cioè tipo di pubblicazione
     #a=analitico; c=raccolta; m=monografia; s=pubblicazione in serie
-    L3A = Label(root, text="Livello ovvero tipo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(
+    L3A = Label(second_frame, text="Livello ovvero tipo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(
         column=1, row=9, sticky=W)
-    level = StringVar(root)
+    level = StringVar(second_frame)
     level.set("m=monografia")  # default value
-    O1 = OptionMenu(root, level, "a=analitico", "c=raccolta", "m=monografia", "s=pubblicazione in serie")
+    O1 = OptionMenu(second_frame, level, "a=analitico", "c=raccolta", "m=monografia", "s=pubblicazione in serie")
     O1.grid(column=1, row=10, sticky=W)
     #identificatore univoco
-    L3B = Label(root, text="Identificatore univoco (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=11, sticky=W)
-    E3 = Entry(root, bd=5)
+    L3B = Label(second_frame, text="Identificatore univoco (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=11, sticky=W)
+    E3 = Entry(second_frame, bd=5)
     E3.grid(column=1, row=12, sticky=W)
     #titolo
-    L4 = Label(root, text="Titolo dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=13, sticky=W)
-    E4 = Entry(root, bd=5)
+    L4 = Label(second_frame, text="Titolo dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=13, sticky=W)
+    E4 = Entry(second_frame, bd=5)
     E4.grid(column=1, row=14, sticky=W)
     #creatore o autore dell'opera
-    L5 = Label(root, text="Autore dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=15, sticky=W)
-    E5 = Entry(root, bd=5)
+    L5 = Label(second_frame, text="Autore dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=15, sticky=W)
+    E5 = Entry(second_frame, bd=5)
     E5.grid(column=1, row=16, sticky=W)
     #editore
-    L6 = Label(root, text="Editore dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=17, sticky=W)
-    E6 = Entry(root, bd=5)
+    L6 = Label(second_frame, text="Editore dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=17, sticky=W)
+    E6 = Entry(second_frame, bd=5)
     E6.grid(column=1, row=18, sticky=W)
     #anno di pubblicazione
-    L7 = Label(root, text="Data di pubblicazione nel formato YYYY-MM-DD (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=19, sticky=W)
-    E7 = Entry(root, bd=5)
+    L7 = Label(second_frame, text="Data di pubblicazione nel formato YYYY-MM-DD (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=19, sticky=W)
+    E7 = Entry(second_frame, bd=5)
     E7.grid(column=1, row=20, sticky=W)
     # descrizione
-    L8 = Label(root, text="Descrizione (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=21, sticky=W)
-    E8 = Entry(root, bd=5)
+    L8 = Label(second_frame, text="Descrizione (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=21, sticky=W)
+    E8 = Entry(second_frame, bd=5)
     E8.grid(column=1, row=22, sticky=W)
     # luogo di pubblicazione
-    L9 = Label(root, text="Luogo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=23, sticky=W)
-    E9 = Entry(root, bd=5)
+    L9 = Label(second_frame, text="Luogo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=23, sticky=W)
+    E9 = Entry(second_frame, bd=5)
     E9.grid(column=1, row=24, sticky=W)
-
+    L10 = Label(second_frame, text="Luogo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(
+        column=1, row=25, sticky=W)
+    E10 = Entry(second_frame, bd=5)
+    E10.grid(column=1, row=26, sticky=W)
 
     def carica_dati():
         print('sono dentro la funzione carica_dati')
@@ -110,7 +123,7 @@ def run_app():
                 input_utente_gen[input] = str(input_utente_gen[input])
 
         input_utente_bib = {"level": level.get(), "identifier": E3.get(),"title":E4.get(),"creator": E5.get(), \
-                            "publisher": E6.get(), "date": E7.get(),"description":E8.get(), "coverage":E9.get() }
+                            "publisher": E6.get(), "date": E7.get(),"description":E8.get(), "coverage":E9.get(), "language": E10.get() }
         if input_utente_bib["identifier"] is None:
             raise Exception("l'identificatore univoco è vuoto o non è stato inserito correttamente.")
         for input in input_utente_bib:
@@ -177,18 +190,18 @@ def run_app():
         date.text = input_bib["date"]
         coverage = etree.SubElement(bib, etree.QName(DC_NAMESPACE, 'coverage'))
         coverage.text = input_bib["coverage"]
+        language = etree.SubElement(bib, etree.QName(DC_NAMESPACE, 'language'))
+        language.text = input_bib["language"]
 
         #stampa del file con aggiunta della dichiarazione xml
         print(etree.tostring(root, pretty_print=True, encoding="utf8", xml_declaration=True))
         exit()
 
-    B1 = ttk.Button(root, text="Carica Foto", command=carica_foto).grid(column=1, row=26, sticky=W)
+    B1 = ttk.Button(second_frame, text="Carica Foto", command=carica_foto).grid(column=1, row=27, sticky=W)
     #B2 = ttk.Button(root, text="Carica Dati", command= carica_dati).grid(column=1, row=13, sticky=W)
-    B3 = ttk.Button(root, text="Genera XML", command=genera_xml).grid(column=1, row=28, sticky=W)
+    B3 = ttk.Button(second_frame, text="Genera XML", command=genera_xml).grid(column=1, row=28, sticky=W)
 
     #adding some polish
-    for child in mainframe.winfo_children():
-        child.grid_configure(padx=5, pady=5)
     #root.bind("<Return>", carica_foto())
 
     root.mainloop()
