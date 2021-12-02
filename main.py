@@ -6,18 +6,36 @@ from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
 from lxml import etree
 from datetime import datetime
+import zipfile
 
 
 
 
 def carica_foto(*args):
+    def extract_zip(input_zip):
+        input_zip = zipfile.ZipFile(input_zip)
+        return {name: input_zip.read(name) for name in input_zip.namelist()}
     print('sono dentro la funzione carica_foto')
     Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
     filename = askopenfilename()  # show an "Open" dialog box and return the path to the selected file
     print(filename)
+    #controlla che il file passato sia uno zip
     if filename.split('.')[-1] != 'zip':
-        messagebox.showerror("Errore di caricamento", "Il file non è uno zip. Le immagini devono essere compresse in uno zip. Riprova.")
-        #raise Exception("Il file non è uno zip. Le immagini devono compresse in uno zip. Riprova.")
+        messagebox.showerror("Errore di caricamento", "Il file {0} non è uno zip. Le immagini devono essere compresse in uno zip. Riprova.".format(filename))
+    #estrai il zip in una cartella temporanea
+    '''
+    try:
+        lista = filename.split('/')
+        base_path = ''
+        for i in lista:
+            base_path = base_path + '/' + i
+    with zipfile.ZipFile(filename, 'r') as zip_ref:
+        zip_ref.extractall(base_path)
+        '''
+    #estrai lo zip in memoria
+    lista_immagini = extract_zip(filename)
+    print(lista_immagini)
+
 
 def run_app():
 

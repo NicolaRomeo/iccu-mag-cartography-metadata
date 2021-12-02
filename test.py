@@ -1,23 +1,107 @@
 import csv
 import json
+import os
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
 from lxml import etree
 from datetime import datetime
+import zipfile
+import subprocess
+from PIL import Image, ExifTags
+from PIL.ExifTags import TAGS
+import filetype
+import shutil
 
 
+class ExifTool(object):
 
+    sentinel = "{ready}\r\n"
+
+    def __init__(self, executable="C:\Program Files\exiftool(-k).exe"):
+        self.executable = executable
+
+    def __enter__(self):
+        self.process = subprocess.Popen(
+            [self.executable, "-stay_open", "True", "-@", "-"],
+            universal_newlines=True,
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        return self
+
+    def  __exit__(self, exc_type, exc_value, traceback):
+        self.process.stdin.write("-stay_open\nFalse\n")
+        self.process.stdin.flush()
+
+    def execute(self, *args):
+        args = args + ("-execute\n",)
+        self.process.stdin.write(str.join("\n", args))
+        self.process.stdin.flush()
+        output = ""
+        fd = self.process.stdout.fileno()
+        while not output.endswith(self.sentinel):
+            output += os.read(fd, 4096).decode('utf-8')
+        return output[:-len(self.sentinel)]
+
+    def get_metadata(self, *filenames):
+        return json.loads(self.execute("-G", "-j", "-n", *filenames))
 
 def carica_foto(*args):
+    def extract_zip(input_zip):
+        input_zip = zipfile.ZipFile(input_zip)
+        return {name: input_zip.read(name) for name in input_zip.namelist()}
     print('sono dentro la funzione carica_foto')
     Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
     filename = askopenfilename()  # show an "Open" dialog box and return the path to the selected file
     print(filename)
+    #controlla che il file passato sia uno zip
     if filename.split('.')[-1] != 'zip':
-        messagebox.showerror("Errore di caricamento", "Il file non è uno zip. Le immagini devono essere compresse in uno zip. Riprova.")
-        #raise Exception("Il file non è uno zip. Le immagini devono compresse in uno zip. Riprova.")
+        messagebox.showerror("Errore di caricamento", "Il file {0} non è uno zip. Le immagini devono essere compresse in uno zip. Riprova.".format(filename))
+    #estrai il zip in una cartella temporanea
+    '''
+    #estrai nella stessa cartella dove si trova il file
+    try:
+        lista = filename.split('/')
+        base_path = ''
+        for i in lista:
+            base_path = base_path + '/' + i
+    '''
+    base_path = Path.home() / 'AppData' / 'Local' / 'Temp' / 'temporary_iccu_folder'
+    p = Path(base_path)
+    if p.exists() and p.is_dir():
+        shutil.rmtree(p)
+    p.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(filename, 'r') as zip_ref:
+        zip_ref.extractall(p.resolve())
+    print('p.resolve = {0}'.format(p.resolve()))
+    dest_folder = filename.split('/')[-1].removesuffix('.zip')
+    full_path_to_images = Path(base_path / dest_folder)
+    print('full path to images {}'.format(full_path_to_images))
+    filenames = []
+    for imagename in os.listdir(full_path_to_images):
+        print('sono dentro la directory')
+        print(imagename)
+        image_path = full_path_to_images / imagename
+        full_path = image_path.absolute()
+        my_path = full_path.as_posix()
+        print('image path {}'.format(my_path))
+        if filetype.is_image(my_path):
+            print("il file {} è un'immagine".format(my_path))
+            filenames.append(my_path)
+        else:
+            continue
+    print('filenames = {}'.format(filenames))
+    with ExifTool() as e:
+        metadata = e.get_metadata(*filenames)
+        print(metadata)
+
+
+
+    #estrai lo zip in memoria
+    #lista_immagini = extract_zip(filename)
+    #print(lista_immagini)
+
 
 def run_app():
 
