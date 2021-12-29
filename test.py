@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import sys
 from pathlib import Path
 from tkinter import *
 from tkinter import ttk
@@ -10,10 +11,9 @@ from lxml import etree
 from datetime import datetime
 import zipfile
 import subprocess
-from PIL import Image, ExifTags
-from PIL.ExifTags import TAGS
 import filetype
 import shutil
+from exif import Image
 
 
 class ExifTool(object):
@@ -45,7 +45,7 @@ class ExifTool(object):
         return output[:-len(self.sentinel)]
 
     def get_metadata(self, *filenames):
-        return json.loads(self.execute("-G", "-j", "-n", *filenames))
+        return json.loads(self.execute("-G", "-j", "-n", "-f", *filenames))
 
 def carica_foto(*args):
     def extract_zip(input_zip):
@@ -91,10 +91,55 @@ def carica_foto(*args):
             filenames.append(my_path)
         else:
             continue
-    print('filenames = {}'.format(filenames))
+    print('filenames is {}'.format(filenames))
+
+    #EXTRACT METADATA USING EXIFTOOLS (Working as of 2021-12-29)
     with ExifTool() as e:
         metadata = e.get_metadata(*filenames)
+        print('metadata is a {}'.format(type(metadata)))
         print(metadata)
+        e.__exit__('i','j','k')
+
+    #starts writing the xml file in append mode, because img is the last of the tags.
+
+    #first we have to check that the file is actually there, otherwise the user will have to go through the
+    #process of generating the rest of the input
+
+
+
+    #bisogna fare una traduzione tra il significato in exiftool e nello standard NISO
+
+'''
+    MAG/NISO:
+    - 1 : nessuna unità di misura definita
+    - 2 : inch, pollice
+    - 3 : centimetro
+    EXIFTOOL:
+    0 = None
+    1 = inches
+    2 = cm
+    
+    
+    
+'''
+'''
+    for image_data in metadata:
+    
+    #use hachoir python command tool to gather images metadata
+    infoDict = {}
+    for img in filenames:
+        exeProcess = "hachoir-metadata"
+        process = subprocess.Popen([exeProcess, img],
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   universal_newlines=True)
+
+        for tag in process.stdout:
+            line = tag.strip().split(':')
+            infoDict[line[0].strip()] = line[-1].strip()
+
+        for k, v in infoDict.items():
+            print(k, ':', v)
+    '''
 
 
 
@@ -279,6 +324,17 @@ def run_app():
 
         #stampa del file con aggiunta della dichiarazione xml
         print(etree.tostring(root, pretty_print=True, encoding="utf8", xml_declaration=True))
+        #creo file temporaneo se non esiste già, in modo che possa essere riscritto in seguito,
+        #per esempio durante il caricamento foto, con un processo parallelo
+        base_path_xml = Path.home() / 'AppData' / 'Local' / 'Temp' / 'temporary_iccu_folder_xml'
+        p = Path(base_path_xml)
+        if p.exists() and p.is_dir():
+            shutil.rmtree(p)
+        p.mkdir(parents=True, exist_ok=True)
+        filename_xml = "metadata_archivio.xml"
+        tree = etree.ElementTree(root)
+        os.chdir(base_path_xml)
+        tree.write(filename_xml)
         exit()
 
     B1 = ttk.Button(second_frame, text="Carica Foto", command=carica_foto).grid(column=1, row=27, sticky=W)
