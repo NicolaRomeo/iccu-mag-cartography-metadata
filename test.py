@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import sys
+import webbrowser
 from pathlib import Path
 from tkinter import *
 from tkinter import ttk
@@ -15,8 +16,13 @@ import filetype
 import shutil
 from PIL import Image as Image_PIL
 import hashlib
+import requests
+from requests_file import FileAdapter
 from exif import Image as IMAGE_exif
 
+'''
+Should also try Pillow instead of PIL
+'''
 
 class ExifTool(object):
 
@@ -136,9 +142,9 @@ def carica_foto(*args):
               'file_location: {} \n'.format(im,sequence_number,nomenclature,file_location))
         '''
         counter = counter + 1
-        immutable_metadata[file_location]= {'image':im}
-        immutable_metadata[file_location].update({'sequence_number':sequence_number})
-        immutable_metadata[file_location].update({'nomenclature': nomenclature})
+        immutable_metadata[im]= {'image':im}
+        immutable_metadata[im].update({'sequence_number':sequence_number})
+        immutable_metadata[im].update({'nomenclature': nomenclature})
     #print("immutable_metadata {}".format(immutable_metadata))
     #USE EXAMPLE OF EXIFTOOL to get complete exif metadata of the image
     '''
@@ -147,8 +153,33 @@ def carica_foto(*args):
         print("getting file name from exiftool metadata: {}".format(file["File:FileName"]))
     '''
     #create a dictionary with all available metadata and save to a json file
-    complete_metadata = [immutable_metadata,Pillow_img_metadata,exiftools_metadata]
+    complete_metadata = []
+    #add immutable metadata
+    for image in filenames:
+        for im in immutable_metadata:
+            if image == im:
+                complete_metadata.append({im:immutable_metadata.get(im)})
+    #add Pillow metadata
+    for full_meta_image in complete_metadata:
+        for i in Pillow_img_metadata:
+            if full_meta_image.get(i):
+                full_meta_image[i].update(Pillow_img_metadata.get(i))
+            else:
+                continue
+    #add exif tools metadata
+    #here we need to update the data structure because otherwise it's really complicated to deal with
+    #the structure will be similar to the other metadata dictionaries, with the filenames as keys
+    exiftools_metadata_dict = {}
+    for j in exiftools_metadata:
+        exiftools_metadata_dict[j['SourceFile']] = j
+    for full_meta_image in complete_metadata:
+        for i in exiftools_metadata_dict:
+            if full_meta_image.get(i):
+                full_meta_image[i].update(exiftools_metadata_dict.get(i))
+            else:
+                continue
     metadata_json_file = json.dumps(complete_metadata)
+    print("printing complete metadata before saving to json file")
     print(metadata_json_file)
     destination = base_path / "data.json"
     with open(destination, "w") as jsonFile:
@@ -248,7 +279,6 @@ def run_app():
     E10.grid(column=1, row=26, sticky=W)
 
     def carica_dati():
-        print('sono dentro la funzione carica_dati')
         input_utente_gen = {"stprog": E1.get(), "agency": E2.get(), "access_rights": var.get(), "completeness": option.get()}
         #controllo che i dati obbligatori per la sezione gen siano stati inseriti correttamente
         if input_utente_gen["stprog"] is None:
@@ -331,8 +361,126 @@ def run_app():
         language = etree.SubElement(bib, etree.QName(DC_NAMESPACE, 'language'))
         language.text = input_bib["language"]
 
+        #Read images metadata from the json file that was created when the user uploaded the images
+        #check that the files exists, throw an error if it doesn't.
+        base_path = Path.home() / 'AppData' / 'Local' / 'Temp' / 'temporary_iccu_folder'
+        source_metadata_file = base_path / "data.json"
+        if not source_metadata_file:
+            messagebox.showerror("Errore: ",
+                                 "Il file {0} non esiste. Questo significa che le immagini non sono ancora state caricate"
+                                 "Per favore cliccare su 'Carica Foto' e riprovare.".format(
+                                     source_metadata_file))
+            exit()
+
+        #open json file
+        f = open(source_metadata_file)
+        data = json.load(f)
+
+        print("printing all data read from the json file containing the metadata from the images \n")
+        print(data)
+
+        for image_dict in data:
+            for i in image_dict:
+                meta_info = image_dict.get(i)
+                #create an <img> tag for each image
+                img = etree.Element("img")
+                #create <img> subelements for each image
+                sequence_number = etree.SubElement(img,'sequence_number')
+                sequence_number.text = str(meta_info.get('sequence_number'))
+                nomenclature = etree.SubElement(img,'nomenclature')
+                nomenclature.text = str(meta_info.get('nomenclature'))
+                #per file dobbiamo creare un attributo xlink
+                attribute_name = etree.QName(XLINK_NS, "href")
+                file = etree.SubElement(img,'file', {attribute_name: meta_info.get('File:FileName'),'Location':'URL'}, nsmap=NSMAP)
+                md5 = etree.SubElement(img,'md5')
+                md5.text = str(meta_info.get('md5'))
+                md5 = etree.SubElement(img, 'filesize')
+                filesize = str(meta_info.get('File:FileSize'))
+                #for image dimensions we need to create the subelements with niso namespace
+                image_length = etree.QName(NISO_NAMESPACE, "image_length")
+                image_width = etree.QName(NISO_NAMESPACE, "image_width")
+                image_dimensions_x= str(meta_info.get('size')[0])
+                image_dimensions_y = str(meta_info.get('size')[1])
+                image_dimension = etree.SubElement(img,'image_dimensions')
+                image_length = etree.SubElement(image_dimension, image_length,nsmap=NSMAP)
+                image_width = etree.SubElement(image_dimension, image_width, nsmap=NSMAP)
+                image_length.text = image_dimensions_y
+                image_width.text = image_dimensions_x
+                datetimecreated = etree.SubElement(img, 'datetimecreated')
+                datetimecreated.text = str(meta_info.get('File:FileCreateDate'))
+                #image metrics contains all mandatory metrics on the image
+                image_metrics = etree.SubElement(img, 'image_metrics')
+                samplingfrequencyunit = etree.SubElement(image_metrics, etree.QName(NISO_NAMESPACE, "samplingfrequencyunit"),nsmap=NSMAP)
+                #I will use dpi to determine x and y sampling frequency, using always inches (frequency unit = 2)
+                samplingfrequencyunit.text = '2'
+                #sampling frequency plane will be always 1, assuming we are reproducing with a camera, and not a scanner. But we will check with exif data
+                samplingfrequencyplane = etree.SubElement(image_metrics, etree.QName(NISO_NAMESPACE, "samplingfrequencyplane"),nsmap=NSMAP)
+                samplingfrequencyplane.text = str(meta_info.get('EXIF:PlanarConfiguration'))
+                #here we do not use xsamplingfrequency and ysamplingfrequency as advised by the Mag Manual
+                #it will come in a later version of the app
+                #photometric interpretation is given in exif tools documentation: https://exiftool.org/TagNames/EXIF.html
+                photometric_interpretation = etree.SubElement(image_metrics,etree.QName(NISO_NAMESPACE, "photometricinterpretation"),nsmap=NSMAP)
+                if meta_info.get('EXIF:PhotometricInterpretation') == 2:
+                    photometric_interpretation.text = 'RGB'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 3:
+                    photometric_interpretation.text = 'RGB Palette'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 0:
+                    photometric_interpretation.text = 'WhiteIsZero'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 1:
+                    photometric_interpretation.text = 'BlackIsZero'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 4:
+                    photometric_interpretation.text = 'Transparency Mask'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 5:
+                    photometric_interpretation.text = 'CMYK'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 6:
+                    photometric_interpretation.text = 'YCbCr'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 8:
+                    photometric_interpretation.text = 'CIELab'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 9:
+                    photometric_interpretation.text = 'ICCLab'
+                elif meta_info.get('EXIF:PhotometricInterpretation') == 10:
+                    photometric_interpretation.text = 'ITULab'
+                bitpersample = etree.SubElement(image_metrics,
+                                                            etree.QName(NISO_NAMESPACE, "bitpersample"),
+                                                              nsmap=NSMAP)
+                bitpersample.text = str(meta_info.get('EXIF:BitsPerSample'))
+                format = etree.SubElement(img, 'format')
+                name = etree.SubElement(format,etree.QName(NISO_NAMESPACE, "name"),nsmap=NSMAP)
+                name.text = str(meta_info.get('File:FileType'))
+                #'File:MIMEType'
+                mime = etree.SubElement(format,etree.QName(NISO_NAMESPACE, "mime"),nsmap=NSMAP)
+                mime.text = str(meta_info.get('File:MIMEType'))
+                compression = etree.SubElement(format,etree.QName(NISO_NAMESPACE, "compression"),nsmap=NSMAP)
+                if meta_info.get('EXIF:Compression') == 2:
+                    compression.text = 'CCITT 1D'
+                elif meta_info.get('EXIF:Compression') == 3:
+                    compression.text = 'T4/Group 3 Fax'
+                elif meta_info.get('EXIF:Compression') == 1:
+                    compression.text = 'Uncompressed'
+                elif meta_info.get('EXIF:Compression') == 4:
+                    compression.text = 'T6/Group 4 Fax'
+                elif meta_info.get('EXIF:Compression') == 5:
+                    compression.text = 'LZW'
+                elif meta_info.get('EXIF:Compression') == 6:
+                    compression.text = 'JPEG (old-style)'
+                elif meta_info.get('EXIF:Compression') == 7:
+                    compression.text = 'JPEG'
+                elif meta_info.get('EXIF:Compression') == 8:
+                    compression.text = 'Adobe Deflate'
+                elif meta_info.get('EXIF:Compression') == 9:
+                    compression.text = 'JBIG B&W'
+                elif meta_info.get('EXIF:Compression') == 10:
+                    compression.text = 'JBIG Color'
+                elif meta_info.get('EXIF:Compression') == 99:
+                    compression.text = 'JPEG'
+                root.append(img)
+
+        #create list of <image> tag until the end of the document
+
+        #write complete xml file
         #stampa del file con aggiunta della dichiarazione xml
         print(etree.tostring(root, pretty_print=True, encoding="utf8", xml_declaration=True))
+
         #creo file temporaneo se non esiste già, in modo che possa essere riscritto in seguito,
         #per esempio durante il caricamento foto, con un processo parallelo
         base_path_xml = Path.home() / 'AppData' / 'Local' / 'Temp' / 'temporary_iccu_folder_xml'
@@ -340,11 +488,42 @@ def run_app():
         if p.exists() and p.is_dir():
             shutil.rmtree(p)
         p.mkdir(parents=True, exist_ok=True)
+        #write xml file
         filename_xml = "metadata_archivio.xml"
         tree = etree.ElementTree(root)
         os.chdir(base_path_xml)
         tree.write(filename_xml)
-        exit()
+        #validate xml document against given MAG schema
+        '''
+        xmlschema = etree.XMLSchema(file='C:/Users/nromeo/OneDrive - DXC Production/Desktop/ICCU Digitalizzazione/ICCU/OLD USEFUL STUFF/metatype.xsd')
+        try:
+            if not xmlschema.validate(tree):
+                #this will print the exception
+                print(xmlschema.validate(tree))
+                messagebox.showerror("Errore di caricamento",
+                                     "Il file {0} non è uno zip. Le immagini devono essere compresse in uno zip. Riprova.".format(
+                                         str(xmlschema.validate(filename_xml))))
+            else:
+                messagebox.showinfo("Il documento xml e' valido.")
+        except Exception as e: raise(e)
+        '''
+        path_xml = base_path_xml / filename_xml
+        download_path = Path.home() / "Downloads"
+        #if the file exists, copy the file in the download folder and open it
+        if os.path.exists(path_xml):
+            shutil.move(path_xml, download_path)
+            if os.path.exists(download_path / filename_xml):
+                webbrowser.open(download_path / filename_xml)
+            else:
+                print("The xml file has not been moved and is still in the Appdata folder")
+        else:
+            print("The xml file does not exist")
+
+
+
+        
+        #validate this againts given existing schema XSD
+
 
     B1 = ttk.Button(second_frame, text="Carica Foto", command=carica_foto).grid(column=1, row=27, sticky=W)
     #B2 = ttk.Button(root, text="Carica Dati", command= carica_dati).grid(column=1, row=13, sticky=W)
