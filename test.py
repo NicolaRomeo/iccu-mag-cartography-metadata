@@ -5,6 +5,7 @@ import sys
 import webbrowser
 from pathlib import Path
 from tkinter import *
+from tkinter.tix import Balloon
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
@@ -185,6 +186,8 @@ def carica_foto(*args):
     with open(destination, "w") as jsonFile:
         jsonFile.write(metadata_json_file)
 
+    messagebox.showinfo("INFO: Caricamento foto", "Le foto sono state caricate correttamente. Ora puoi generare l'xml ")
+
 
 
 
@@ -212,12 +215,17 @@ def run_app():
     '''                     SEZIONE GEN         '''
     #input utente per Stprog: indicazione del progetto di digitalizzazione. Esempio: www.mioprogetto.it
     # oppure l'home page dell'istituzione responsabile oppure l'uri del progetto
-    L1 = Label(second_frame, text="Stprog (premi invio nella casella di testo per inserire i dati)").grid(column=1, row=1, sticky=W)
+    L1_tooltip= "Descrizione oppure Home page dell'istituzione responsabile. Obbligatorio.\n "
+    L1 = Label(second_frame, text="Stprog -"+L1_tooltip).grid(column=1, row=1, sticky=W)
+    L1B = Label(second_frame, text="Es. www.mioprogetto.it").grid(column=2, row=2, sticky=W)
     E1 = Entry(second_frame, bd=5)
     E1.grid(column=1, row=2, sticky=W)
 
+
     #input utente per agency = istituzione responsabile del processo.
-    L2 = Label(second_frame, text="Agency (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=3, sticky=W)
+    L2_tooltip = "Istituzione responsabile del processo. Obbligatorio."
+    L2 = Label(second_frame, text="Agency - "+L2_tooltip).grid(column=1, row=3, sticky=W)
+    L2B = Label(second_frame, text="Es. 'Comune di La Spezia' oppure 'IT:Regione Liguria ").grid(column=2, row=4, sticky=W)
     E2 = Entry(second_frame, bd=5)
     E2.grid(column=1, row=4, sticky=W)
 
@@ -227,64 +235,69 @@ def run_app():
     R1 = Radiobutton(second_frame, text="0: Uso riservato all'interno dell'istituzione", variable=var, value=0)
     R2 = Radiobutton(second_frame, text="1: Uso pubblico", variable=var, value=1)
     R1.grid(column=1, row=6, sticky=W)
-    R2.grid(column=2, row=6, sticky=W)
+    R2.grid(column=1, row=8, sticky=W)
     #input utente per Completezza della digitalizzazione: (0=completa, 1=incompleta)
-    L4 = Label(second_frame, text="Completezza della digitalizzazione").grid(column=1, row=7, sticky=W)
+    L4 = Label(second_frame, text="Completezza della digitalizzazione").grid(column=1, row=9, sticky=W)
     option = IntVar()
     R1 = Radiobutton(second_frame, text="0: digitalizzazione completa", variable=option, value=0)
     R2 = Radiobutton(second_frame, text="1: digitalizzazione incompleta", variable=option, value=1)
-    R1.grid(column=1, row=8, sticky=W)
-    R2.grid(column=2, row=8, sticky=W)
+    R1.grid(column=1, row=10, sticky=W)
+    R2.grid(column=1, row=12, sticky=W)
 
     '''                     SEZIONE BIB         '''
     #livello cioè tipo di pubblicazione
     #a=analitico; c=raccolta; m=monografia; s=pubblicazione in serie
-    L3A = Label(second_frame, text="Livello ovvero tipo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(
-        column=1, row=9, sticky=W)
+    L3A = Label(second_frame, text="Livello ovvero tipo di pubblicazione").grid(
+        column=1, row=13, sticky=W)
     level = StringVar(second_frame)
     level.set("m=monografia")  # default value
     O1 = OptionMenu(second_frame, level, "a=analitico", "c=raccolta", "m=monografia", "s=pubblicazione in serie")
-    O1.grid(column=1, row=10, sticky=W)
+    O1.grid(column=1, row=14, sticky=W)
     #identificatore univoco
-    L3B = Label(second_frame, text="Identificatore univoco (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=11, sticky=W)
+    L3B = Label(second_frame, text="Identificatore univoco - identificatore SBN o simile. Obbligatorio. ").grid(column=1, row=15, sticky=W)
     E3 = Entry(second_frame, bd=5)
-    E3.grid(column=1, row=12, sticky=W)
+    E3.grid(column=1, row=16, sticky=W)
     #titolo
-    L4 = Label(second_frame, text="Titolo dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=13, sticky=W)
+    L4 = Label(second_frame, text="Titolo dell'opera ").grid(column=1, row=17, sticky=W)
     E4 = Entry(second_frame, bd=5)
-    E4.grid(column=1, row=14, sticky=W)
+    E4.grid(column=1, row=18, sticky=W)
     #creatore o autore dell'opera
-    L5 = Label(second_frame, text="Autore dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=15, sticky=W)
+    L5 = Label(second_frame, text="Autore dell'opera ").grid(column=1, row=19, sticky=W)
     E5 = Entry(second_frame, bd=5)
-    E5.grid(column=1, row=16, sticky=W)
+    E5.grid(column=1, row=20, sticky=W)
     #editore
-    L6 = Label(second_frame, text="Editore dell'opera (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=17, sticky=W)
+    L6 = Label(second_frame, text="Editore dell'opera ").grid(column=1, row=21, sticky=W)
     E6 = Entry(second_frame, bd=5)
-    E6.grid(column=1, row=18, sticky=W)
+    E6.grid(column=1, row=22, sticky=W)
     #anno di pubblicazione
-    L7 = Label(second_frame, text="Data di pubblicazione nel formato YYYY-MM-DD (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=19, sticky=W)
+    L7 = Label(second_frame, text="Data di pubblicazione nel formato YYYY-MM-DD").grid(column=1, row=23, sticky=W)
     E7 = Entry(second_frame, bd=5)
-    E7.grid(column=1, row=20, sticky=W)
+    E7.grid(column=1, row=24, sticky=W)
     # descrizione
-    L8 = Label(second_frame, text="Descrizione (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=21, sticky=W)
+    L8 = Label(second_frame, text="Descrizione generica dell'opera").grid(column=1, row=25, sticky=W)
     E8 = Entry(second_frame, bd=5)
-    E8.grid(column=1, row=22, sticky=W)
+    E8.grid(column=1, row=26, sticky=W)
     # luogo di pubblicazione
-    L9 = Label(second_frame, text="Luogo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(column=1, row=23, sticky=W)
+    L9 = Label(second_frame, text="Luogo di pubblicazione").grid(column=1, row=27, sticky=W)
     E9 = Entry(second_frame, bd=5)
-    E9.grid(column=1, row=24, sticky=W)
-    L10 = Label(second_frame, text="Luogo di pubblicazione (premi invio nella casella di testo per inserire i dati) ").grid(
-        column=1, row=25, sticky=W)
+    E9.grid(column=1, row=28, sticky=W)
+    L10 = Label(second_frame, text="Linguaggio dell'opera").grid(
+        column=1, row=29, sticky=W)
     E10 = Entry(second_frame, bd=5)
-    E10.grid(column=1, row=26, sticky=W)
+    E10.grid(column=1, row=30, sticky=W)
 
     def carica_dati():
-        input_utente_gen = {"stprog": E1.get(), "agency": E2.get(), "access_rights": var.get(), "completeness": option.get()}
+        input_utente_gen = {"stprog": E1.get(), "agency": E2.get(), "access_rights": var.get(), "completeness": option.get(),
+                            }
         #controllo che i dati obbligatori per la sezione gen siano stati inseriti correttamente
+        TITLE="ERRORE UTENTE NELL'INSERIMENTO DATI"
+        ERROR_MESSAGE=" è vuoto o non è stato inserito correttamente. \" " \
+                      "Ricorda di premere Invio dopo aver inserito il valore nella casella di testo"
         if input_utente_gen["stprog"] is None:
-            raise Exception('Stprog è vuoto o non è stato inserito correttamente.')
+            messagebox.showerror(title=TITLE, message='Stprog'+ERROR_MESSAGE)
         if input_utente_gen["agency"] is None:
-            raise Exception('agency è vuoto o non è stato inserito correttamente.')
+            messagebox.showerror(title=TITLE, message='Agency'+ERROR_MESSAGE)
+
         #salvo tutti gli input come stringhe per poterli mettere nell'xml
         for input in input_utente_gen:
             if input_utente_gen[input] is not None:
@@ -293,7 +306,7 @@ def run_app():
         input_utente_bib = {"level": level.get(), "identifier": E3.get(),"title":E4.get(),"creator": E5.get(), \
                             "publisher": E6.get(), "date": E7.get(),"description":E8.get(), "coverage":E9.get(), "language": E10.get() }
         if input_utente_bib["identifier"] is None:
-            raise Exception("l'identificatore univoco è vuoto o non è stato inserito correttamente.")
+            messagebox.showerror(title=TITLE, message='Identificatore Univoco '+ERROR_MESSAGE)
         for input in input_utente_bib:
             if input_utente_bib[input] is not None:
                 input_utente_bib[input] = str(input_utente_bib[input])
@@ -510,6 +523,9 @@ def run_app():
         path_xml = base_path_xml / filename_xml
         download_path = Path.home() / "Downloads"
         #if the file exists, copy the file in the download folder and open it
+        #first delete anything we created in the download folder.
+        if os.path.exists(download_path):
+                os.remove(download_path / filename_xml)
         if os.path.exists(path_xml):
             shutil.move(path_xml, download_path)
             if os.path.exists(download_path / filename_xml):
@@ -525,9 +541,9 @@ def run_app():
         #validate this againts given existing schema XSD
 
 
-    B1 = ttk.Button(second_frame, text="Carica Foto", command=carica_foto).grid(column=1, row=27, sticky=W)
+    B1 = ttk.Button(second_frame, text="Carica Foto", command=carica_foto).grid(column=1, row=31, sticky=W)
     #B2 = ttk.Button(root, text="Carica Dati", command= carica_dati).grid(column=1, row=13, sticky=W)
-    B3 = ttk.Button(second_frame, text="Genera XML", command=genera_xml).grid(column=1, row=28, sticky=W)
+    B3 = ttk.Button(second_frame, text="Genera XML", command=genera_xml).grid(column=1, row=32, sticky=W)
 
     #adding some polish
     #root.bind("<Return>", carica_foto())
