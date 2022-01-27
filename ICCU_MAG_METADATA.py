@@ -251,7 +251,8 @@ def run_app():
         column=1, row=13, sticky=W)
     level = StringVar(second_frame)
     level.set("m=monografia")  # default value
-    O1 = OptionMenu(second_frame, level, "a=analitico", "c=raccolta", "m=monografia", "s=pubblicazione in serie")
+    O1 = OptionMenu(second_frame, level, "a=analitico", "c=raccolta", "m=monografia", "s=pubblicazione in serie",
+                    "f=unità archivistica", "d=unità documentaria")
     O1.grid(column=1, row=14, sticky=W)
     # identificatore univoco
     L3B = Label(second_frame, text="Identificatore univoco - identificatore SBN o simile. Obbligatorio. ").grid(
@@ -359,6 +360,10 @@ def run_app():
             level = 'c'
         elif input_bib["level"].startswith("s"):
             level = 's'
+        elif input_bib["level"].startswith("d"):
+            level = 'd'
+        elif input_bib["level"].startswith("f"):
+            level = 'f'
         bib.set("level", level)
         root.append(bib)
         # crea i sottoelementi di bib usando il namespace Dublin Core come tag
