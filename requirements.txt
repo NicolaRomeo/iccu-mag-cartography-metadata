@@ -5,3 +5,4 @@ tkinter
 Pillow
 exif
 filetype
+exiftool
