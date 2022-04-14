@@ -100,13 +100,15 @@ def carica_foto(*args):
     print('elenco delle immagini recuperate: {}'.format(filenames))
 
     # EXTRACT METADATA USING EXIFTOOLS (Working as of 2021-12-29)
+
     with ExifTool() as e:
         exiftools_metadata = e.get_metadata(*filenames)
-        '''
-        print('metadata is a {}'.format(type(metadata)))
-        print(metadata)
-        '''
+        #print('metadata is a {}'.format(type(metadata)))
+        #print(metadata)
         e.__exit__('i', 'j', 'k')
+
+    # EXTRACT METADATA USING PYEXIFTOOL, a wrapper for exiftool TBD
+    #print("Testing using PyExifTool")
 
     # starts writing the xml file in append mode, because img is the last of the tags.
 
