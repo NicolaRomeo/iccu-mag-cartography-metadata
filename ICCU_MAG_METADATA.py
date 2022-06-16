@@ -8,6 +8,7 @@ from tkinter import messagebox
 from lxml import etree
 from datetime import datetime
 import shutil
+import subprocess
 from handle_upload import carica_foto
 
 '''
@@ -365,12 +366,12 @@ def run_app():
         download_path = Path.home() / "Downloads"
         # if the file exists, copy the file in the download folder and open it
         # first delete anything we created in the download folder.
-        if os.path.exists(download_path):
+        if os.path.exists(download_path / filename_xml):
             os.remove(download_path / filename_xml)
         if os.path.exists(path_xml):
             shutil.move(path_xml, download_path)
             if os.path.exists(download_path / filename_xml):
-                webbrowser.open(download_path / filename_xml)
+                subprocess.call(('open', '-a', 'TextEdit', download_path / filename_xml))
             else:
                 print("The xml file has not been moved and is still in the Appdata folder")
         else:
