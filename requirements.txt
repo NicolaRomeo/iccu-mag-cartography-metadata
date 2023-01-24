@@ -1,8 +1,7 @@
 lxml
 filetype
 requests
-tkinter
+tk
 Pillow
-exif
-filetype
-exiftool
+filetype==1.0.8
+exif==1.3.4

@@ -41,7 +41,7 @@ def carica_foto(*args):
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall(p.resolve())
     dest_folder = filename.split('/')[-1].removesuffix('.zip')
-    full_path_to_images = Path(base_path / dest_folder)
+    full_path_to_images = Path(base_path)
     filenames = []
     for imagename in os.listdir(full_path_to_images):
         image_path = full_path_to_images / imagename
