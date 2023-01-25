@@ -38,8 +38,13 @@ def carica_foto(*args):
     if p.exists() and p.is_dir():
         shutil.rmtree(p)
     p.mkdir(parents=True, exist_ok=True)
+    #delete temporary __MACOS folder
+    macos_temp_dir = base_path / '__MACOSX'
+    macos_temp_path = Path(macos_temp_dir)
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall(p.resolve())
+    if macos_temp_path.exists() and macos_temp_path.is_dir():
+        shutil.rmtree(macos_temp_path)
     dest_folder = filename.split('/')[-1].removesuffix('.zip')
     full_path_to_images = Path(base_path)
     filenames = []
