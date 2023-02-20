@@ -1,5 +1,5 @@
 # iccu-mag-cartography-metadata
-python script for a Desktop app to be run on Mac Os (and only Mac Os) that converts a set of images for the digitization of cartographical material following the italian MAG standard
+python script for a Desktop app to be run on Mac Os that converts a set of images for the digitization of cartographical material following the italian MAG standard
 The app was made and tested with Big Sur as operating system and it's not necessarily
 compatible with other Mac Os operating systems. 
 
