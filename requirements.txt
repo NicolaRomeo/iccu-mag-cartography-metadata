@@ -3,6 +3,4 @@ filetype
 requests
 tkinter
 Pillow
-exif
-filetype
 exiftool
