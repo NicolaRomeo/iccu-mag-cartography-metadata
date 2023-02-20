@@ -10,15 +10,3 @@ machine. Then from a terminal, inside the project folder, run
 
 > rm -rf build dist
 > python3 setup.py py2app 
-
-
-### How to run
-Simply unzip the file ICCU_MAG_METADATA_<os>_<app_version>.zip anywhere.
-Open the dist folder and double click on the ICCU_MAG_METADATA.exe file.
-
-
-
-### Known issues
-
-1. The application takes quite some time to load, therefore the user has to wait after double clicking
-up to a minute before the application actually shows in the taskbar.
