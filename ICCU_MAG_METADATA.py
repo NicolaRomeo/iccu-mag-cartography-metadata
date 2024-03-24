@@ -1,6 +1,5 @@
 import json
 import os
-import webbrowser
 from pathlib import Path
 from tkinter import *
 from tkinter import ttk
@@ -10,10 +9,6 @@ from datetime import datetime
 import shutil
 import subprocess
 from handle_upload import carica_foto
-
-'''
-Should also try Pillow instead of PIL
-'''
 
 def run_app():
     # main application window

@@ -1,0 +1,15 @@
+
+[docs]
+packaging
+sphinx
+sphinx-autoapi
+sphinx-rtd-theme
+sphinx-autodoc-typehints
+
+[json]
+ujson
+simplejson
+orjson
+
+[test]
+packaging
