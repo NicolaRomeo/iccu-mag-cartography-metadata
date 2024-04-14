@@ -1,24 +1,35 @@
 # iccu-mag-cartography-metadata
-python script for a Desktop app that converts a set of images for the digitization of cartographical material following the italian MAG standard
-
+python script for a Desktop app to be run on Mac Os that converts a set of images for the digitization of cartographical material following the italian MAG standard
+The app was made and tested with Big Sur as operating system and it's not necessarily
+compatible with other Mac Os operating systems. 
 
 ### How to build 
-it is not necessary to build the application, as the desktop app is already packed in the zip file ICCU_MAG_METADATA_<os>_<app_version>.zip.
-If you do want to build your own code however, 
+Clone the project in your Mac Os Big Sur
+machine. Then from a terminal, inside the project folder, run
 
-from a terminal,
-run 
-
-> pyinstaller --windowed ICCU_MAG_METADATA.py
+> python3 setup.py py2app
 
 
-### How to run
-Simply unzip the file ICCU_MAG_METADATA_<os>_<app_version>.zip anywhere.
-Open the dist folder and double click on the ICCU_MAG_METADATA.exe file.
+for documentation on py2app
+https://py2app.readthedocs.io/en/latest/tutorial.html
 
 
+you can build in alias mode with
+> python setup.py py2app -A
 
-### Known issues
 
-1. The application takes quite some time to load, therefore the user has to wait after double clicking
-up to a minute before the application actually shows in the taskbar.
+To combine py2app with setup.py
+https://py2app.readthedocs.io/en/latest/setuptools.html
+
+# Run the application
+
+### Prerequisite
+Install the MacOS image for exiftool from the website
+https://exiftool.org/
+
+the application is tested with ExifTool-12.82.dmg.
+
+### Run 
+Go to the application package. Click right > Package Contents.
+Navigate to MacOs > double click on ICCU_MAG_METADATA
+
