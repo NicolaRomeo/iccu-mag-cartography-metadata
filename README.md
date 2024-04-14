@@ -4,9 +4,32 @@ The app was made and tested with Big Sur as operating system and it's not necess
 compatible with other Mac Os operating systems. 
 
 ### How to build 
-it is not necessary to build the application, as the desktop app is already packed 
-If you do want to build the application, clone the project in your Mac Os Big Sur
+Clone the project in your Mac Os Big Sur
 machine. Then from a terminal, inside the project folder, run
 
-> rm -rf build dist
-> python3 setup.py py2app 
+> python3 setup.py py2app
+
+
+for documentation on py2app
+https://py2app.readthedocs.io/en/latest/tutorial.html
+
+
+you can build in alias mode with
+> python setup.py py2app -A
+
+
+To combine py2app with setup.py
+https://py2app.readthedocs.io/en/latest/setuptools.html
+
+# Run the application
+
+### Prerequisite
+Install the MacOS image for exiftool from the website
+https://exiftool.org/
+
+the application is tested with ExifTool-12.82.dmg.
+
+### Run 
+Go to the application package. Click right > Package Contents.
+Navigate to MacOs > double click on ICCU_MAG_METADATA
+
