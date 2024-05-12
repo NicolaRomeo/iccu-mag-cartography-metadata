@@ -8,7 +8,7 @@ import zipfile
 import filetype
 import shutil
 from exiftool import ExifToolHelper
-from PIL import Image as Image_PIL
+from PIL import Image as Image_PIL, TiffImagePlugin
 import hashlib
 
 def carica_foto(*args):
@@ -68,16 +68,13 @@ def carica_foto(*args):
         e.__exit__('i', 'j', 'k')
     '''
     # EXTRACT METADATA USING PYEXIFTOOL, a wrapper for exiftool TBD
-    print("Testing using PyExifTool")
+    print("Using PyExifTool")
     exiftools_metadata = []
     with ExifToolHelper() as et:
         for file in filenames:
             metadata = et.get_metadata(file)
-            for d in metadata:
-                for k, v in d.items():
-                    print(f"Dict: {k} = {v}")
             exiftools_metadata.append(metadata[0])
-    print("exiftool metadata found in images: \n {}".format(exiftools_metadata))
+    #print("exiftool metadata found in images: \n {}".format(exiftools_metadata))
     # starts writing the xml file in append mode, because img is the last of the tags.
 
     # first we have to check that the file is actually there, otherwise the user will have to go through the
@@ -154,9 +151,15 @@ def carica_foto(*args):
                 full_meta_image[i].update(exiftools_metadata_dict.get(i))
             else:
                 continue
-    metadata_json_file = json.dumps(complete_metadata)
-    print("printing complete metadata before saving to json file \n")
-    print(metadata_json_file)
+    meta_len = len(complete_metadata)
+    print(f"len of complete metadata: {meta_len}")
+    print("complete_metadata")
+    #print(complete_metadata)
+
+    print(complete_metadata[1])
+    metadata_json_file = json.dumps(complete_metadata, default=lambda o :'<not serializable>' )
+    #print("printing complete metadata before saving to json file \n")
+    #print(metadata_json_file)
     destination = base_path / "data.json"
     with open(destination, "w") as jsonFile:
         jsonFile.write(metadata_json_file)
